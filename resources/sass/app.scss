@@ -20,3 +20,8 @@ $fa-font-path: "../webfonts";
 }
 
 @import "custom";
+
+.router-link-exact-active {
+  background-color: #615472;
+  color: #fff !important;
+}
