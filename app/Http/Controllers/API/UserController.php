@@ -10,6 +10,63 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
+
+    public function profile()
+    {
+        return auth('api')->user();
+    }
+    
+    public function updateProfile(Request $request)
+    {
+        $user= auth('api')->user();
+
+        $this->validate($request,[
+            'name'    => 'required|string|max:191',
+            'email'   => 'required|string|max:191|email|unique:users,email,'.$user->id,
+            'password'=> 'sometimes|required|min:6'
+        ]);
+
+        //return $request->photo;
+        //return ['message' => 'Updated user info'];
+        $currentPhoto = $user->photo;
+        
+        if($request->photo != $currentPhoto){
+
+            $name = time().'.'.explode('/', explode(':', substr($request->photo, 0, strpos($request->photo, ';')))[1])[1];
+
+            \Image::make($request->photo)->save(public_path('img/profilephoto/').$name);
+
+            $request->merge(['photo' => $name]);
+
+
+            $userPhoto = public_path('img/profilephoto/').$currentPhoto;
+            if(file_exists($userPhoto)){
+                @unlink($userPhoto);
+            }
+
+        }
+
+        if(!empty($request->password)){
+            $request->merge(['password' => Hash::make($request['password'])]);
+        }
+
+        $user->update($request->all());
+        return ['message' => 'success'];
+    }
+
+
+
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response

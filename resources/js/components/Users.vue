@@ -122,15 +122,15 @@
                 editMode: false,
                 users: {},
             // Create a new form instance
-            form: new Form({
-                id: '',
-                name : '',
-                email : '',
-                password : '',
-                type : '',
-                bio : '',
-                photo : ''
-            })
+                form: new Form({
+                    id: '',
+                    name : '',
+                    email : '',
+                    password : '',
+                    type : '',
+                    bio : '',
+                    photo : ''
+                })
             }
         },
         methods: {
