@@ -11,6 +11,9 @@ window.Vue = require('vue');
 import moment from 'moment';
 
 
+import Gate from "./Gate";
+Vue.prototype.$gate = new Gate(window.user);
+
 import { Form, HasError, AlertError } from 'vform'
 window.Form = Form;
 Vue.component(HasError.name, HasError)
@@ -24,7 +27,8 @@ let routes = [
     { path: '/dashboard', components: require('./components/Dashboard.vue') },
     { path: '/developer', components: require('./components/Developer.vue') },
     { path: '/profile', components: require('./components/Profile.vue') },
-    { path: '/users', components: require('./components/Users.vue') }
+    { path: '/users', components: require('./components/Users.vue') },
+    { path: '*', components: require('./components/NotFound.vue') }
   ]
 
 
@@ -62,6 +66,10 @@ const toast = swal.mixin({
 
 window.toast = toast;
 
+
+Vue.component('pagination', require('laravel-vue-pagination'));
+
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -89,6 +97,13 @@ Vue.component(
   'passport-personal-access-tokens',
   require('./components/passport/PersonalAccessTokens.vue').default
 );
+
+
+Vue.component(
+  'not-found',
+  require('./components/NotFound.vue').default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -97,5 +112,22 @@ Vue.component(
 
 const app = new Vue({
     el: '#app',
-    router
+    router,
+    data:{
+      search: ''
+    },
+    methods:{
+      searchit: _.debounce(() => {
+        console.log('it is work');
+        Fire.$emit('searching');
+      },1000),
+
+      printme(){
+        window.print();
+      }
+
+    }
+
+
+
 });

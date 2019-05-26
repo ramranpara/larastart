@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-       <div class="row">
+       <div class="row" v-if="$gate.isAdminOrAuthor()">
           <div class="col-12">
             <div class="card">
               <div class="card-header">
@@ -22,7 +22,7 @@
                      <th>Registered at</th>
                     <th>Modify</th>
                   </tr>
-                  <tr v-for="user in users" :key="user.id" >
+                  <tr v-for="user in users.data" :key="user.id" >
                     <td>{{user.id}}</td>
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
@@ -42,10 +42,17 @@
                 </tbody></table>
               </div>
               <!-- /.card-body -->
+              <div class="card-footer">
+                    <pagination :data="users" @pagination-change-page="getResults"></pagination>
+              </div>   
             </div>
             <!-- /.card -->
           </div>
         </div>
+        
+        <div v-if="!$gate.isAdminOrAuthor()">
+            <not-found></not-found>
+        </div>    
 
         <div class="modal fade" id="Addnew" tabindex="-1" role="dialog" aria-labelledby="AddnewLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -134,6 +141,12 @@
             }
         },
         methods: {
+                getResults(page = 1) {
+                    axios.get('api/user?page=' + page)
+                        .then(response => {
+                            this.users = response.data;
+                        });
+	    	    },
             updateUser(id){
                 this.$Progress.start();
 
@@ -195,8 +208,10 @@
                     
                 })
             },
-            loadUsers(){
-                axios.get("api/user").then(({ data }) => (this.users = data.data));
+            loadUsers(){ 
+                if(this.$gate.isAdminOrAuthor()){
+                    axios.get("api/user").then(({ data }) => (this.users = data));
+                }
             },
             createUser () {
                  this.$Progress.start()
@@ -220,6 +235,18 @@
             }
         },
         created() {
+
+            Fire.$on('searching',() => {
+                let query = this.$parent.search;
+                axios.get('api/findUser?q=' + query)
+                .then((data) => {
+                    this.users = data.data
+                })
+                .catch(() => {
+                    
+                })
+            })
+
             this.loadUsers();
             Fire.$on('AfterCreate', () => {
                 this.loadUsers();
